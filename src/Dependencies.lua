@@ -30,8 +30,11 @@ require 'src/Util'
 -- its own update and render methods that can be called by our state machine
 -- each frame, to avoid bulky code in main.lua
 require 'src/states/BaseState'
+require 'src/states/PaddleSelectState'
 require 'src/states/StartState'
 require 'src/states/PlayState'
 require 'src/states/ServeState'
 require 'src/states/GameOverState'
 require 'src/states/VictoryState'
+require 'src/states/HighScoreState'
+require 'src/states/EnterHighScoreState'

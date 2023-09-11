@@ -26,7 +26,8 @@ function love.load()
         ['paddles'] = GenerateQuadsPaddles(gTextures['main']),
         ['balls'] = GenerateQuadsBalls(gTextures['main']),
         ['bricks'] = GenerateQuadsBricks(gTextures['main']),
-        ['hearts'] = GenerateQuads(gTextures['hearts'], 10, 9)
+        ['hearts'] = GenerateQuads(gTextures['hearts'], 10, 9),
+        ['arrows'] = GenerateQuads(gTextures['arrows'], 24, 24)
     }
 
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
@@ -64,15 +65,25 @@ function love.load()
     -- 4. 'play' (the ball is in play, bouncing between paddles)
     -- 5. 'victory' (the current level is over, with a victory jingle)
     -- 6. 'game-over' (the player has lost; display score and allow restart)
+    -- 7. 'high-scores'
+    -- 8. 'enter-high-scores'
     _G.gStateMachine = StateMachine {
         ['start'] = function() return StartState() end,
-        -- ['paddle-select'] = function() return PaddleSelectState() end,
+        ['paddle-select'] = function() return PaddleSelectState() end,
         ['serve'] = function() return ServeState() end,
         ['play'] = function() return PlayState() end,
         ['victory'] = function() return VictoryState() end,
-        ['game-over'] = function() return GameOverState() end
+        ['game-over'] = function() return GameOverState() end,
+        ['high-scores'] = function() return HighScoreState() end,
+        ['enter-high-scores'] = function() return EnterHighScoreState() end,
     }
-    gStateMachine:change('start')
+    gStateMachine:change('start', {
+        highScores = LoadHighScores()
+    })
+
+    -- play our music outside of all states and set it to looping
+    gSounds['music']:play()
+    gSounds['music']:setLooping(true)
 
     love.keyboard.keysPressed = {}
 end
@@ -142,4 +153,54 @@ function RenderScore(score)
     love.graphics.setFont(gFonts['small'])
     love.graphics.print('Score: ', VIRTUAL_WIDTH - 60, 5)
     love.graphics.printf(tostring(score), VIRTUAL_WIDTH - 50, 5, 40, 'right')
+end
+
+--[[
+    Loads high scores from a .lst file, saved in LÖVE2D's default save directory in a subfolder
+    called 'breakout'.
+]]
+function LoadHighScores()
+    love.filesystem.setIdentity('breakout')
+
+    -- if the file doesn't exist, initialize it with some default scores
+    if not love.filesystem.getInfo('breakout.lst') then
+        local scores = ''
+        for i = 10, 1, -1 do
+            scores = scores .. 'CTO\n'
+            scores = scores .. tostring(i * 1000) .. '\n'
+        end
+
+        love.filesystem.write('breakout.lst', scores)
+    end
+
+    -- flag for whether we're reading a name or not
+    local name = true
+    local currentName = nil
+    local counter = 1
+
+    -- initialize scores table with at least 10 blank entries
+    local scores = {}
+
+    for i = 1, 10 do
+        -- blank table; each will hold a name and a score
+        scores[i] = {
+            name = nil,
+            score = nil
+        }
+    end
+
+    -- iterate over each line in the file, filling in names and scores
+    for line in love.filesystem.lines('breakout.lst') do
+        if name then
+            scores[counter].name = string.sub(line, 1, 3)
+        else
+            scores[counter].score = tonumber(line)
+            counter = counter + 1
+        end
+
+        -- flip the name flag
+        name = not name
+    end
+
+    return scores
 end
