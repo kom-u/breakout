@@ -17,6 +17,7 @@ _G.Class = require 'lib/class'
 require 'src/constants'
 
 require 'src/Paddle'
+require 'src/Ball'
 
 require 'src/StateMachine'
 
