@@ -1,11 +1,11 @@
 require 'src/Dependencies'
 
 function love.load()
-    love.graphics.setDefaultFilter("nearest", "nearest")
+    love.graphics.setDefaultFilter('nearest', 'nearest')
 
     math.randomseed(os.time())
 
-    love.window.setTitle("Breakout")
+    love.window.setTitle('Breakout')
 
     _G.gFonts = {
         ['small'] = love.graphics.newFont('fonts/font.ttf', 8),
@@ -60,10 +60,54 @@ function love.load()
     _G.gStateMachine = StateMachine {
         ['start'] = function() return StartState() end
     }
-    _G.gStateMachine:change('start')
+    gStateMachine:change('start')
 
-    -- a table we'll use to keep track of which keys have been pressed this
-    -- frame, to get around the fact that LÖVE's default callback won't let us
-    -- test for input from within other functions
     love.keyboard.keysPressed = {}
+end
+
+function love.resize(w, h)
+    push:resize(w, h)
+end
+
+function love.update(dt)
+    gStateMachine:update(dt)
+
+    love.keyboard.keysPressed = {}
+end
+
+function love.keypressed(key)
+    love.keyboard.keysPressed[key] = true
+end
+
+function love.keyboard.wasPressed(key)
+    if love.keyboard.keysPressed[key] then
+        return true
+    end
+
+    return false
+end
+
+function love.draw()
+    push:apply('start')
+
+    local backgroundWidth = gTextures['background']:getWidth()
+    local backgroundHeight = gTextures['background']:getHeight()
+
+    love.graphics.draw(gTextures['background'],
+        0, 0,
+        0,
+        VIRTUAL_WIDTH / (backgroundWidth - 1),
+        VIRTUAL_HEIGHT / (backgroundHeight - 1))
+
+    gStateMachine.render()
+
+    DisplayFPS()
+
+    push:apply('end')
+end
+
+function DisplayFPS()
+    love.graphics.setFont(gFonts['small'])
+    love.graphics.setColor(0, 1, 0, 1)
+    love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()), 5, 5)
 end
