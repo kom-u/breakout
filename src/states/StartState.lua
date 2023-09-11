@@ -1,7 +1,7 @@
 -- the "__includes" bit here means we're going to inherit all of the methods
 -- that BaseState has, so it will have empty versions of all StateMachine methods
 -- even if we don't override them ourselves; handy to avoid superfluous code!
-StartState = Class{__includes = BaseState}
+StartState = Class { __includes = BaseState }
 
 -- whether we're highlighting "Start" or "High Scores"
 local highlighted = 1
@@ -17,7 +17,12 @@ function StartState:update(dt)
         gSounds['confirm']:play()
 
         if highlighted == 1 then
-            gStateMachine:change('play')
+            gStateMachine:change('serve', {
+                paddle = Paddle(1),
+                bricks = LevelMaker:createMap(),
+                health = 3,
+                score = 0
+            })
         end
     end
 
@@ -32,13 +37,13 @@ function StartState:render()
     love.graphics.setFont(gFonts['large'])
     love.graphics.printf("BREAKOUT", 0, VIRTUAL_HEIGHT / 3,
         VIRTUAL_WIDTH, 'center')
-    
+
     -- instructions
     love.graphics.setFont(gFonts['medium'])
 
     -- if we're highlighting 1, render that option blue
     if highlighted == 1 then
-        love.graphics.setColor(103/255, 1, 1, 1)
+        love.graphics.setColor(103 / 255, 1, 1, 1)
     end
     love.graphics.printf("START", 0, VIRTUAL_HEIGHT / 2 + 70,
         VIRTUAL_WIDTH, 'center')
@@ -48,7 +53,7 @@ function StartState:render()
 
     -- render option 2 blue if we're highlighting that one
     if highlighted == 2 then
-        love.graphics.setColor(103/255, 1, 1, 1)
+        love.graphics.setColor(103 / 255, 1, 1, 1)
     end
     love.graphics.printf("HIGH SCORES", 0, VIRTUAL_HEIGHT / 2 + 90,
         VIRTUAL_WIDTH, 'center')
