@@ -69,7 +69,7 @@ function love.load()
         -- ['paddle-select'] = function() return PaddleSelectState() end,
         ['serve'] = function() return ServeState() end,
         ['play'] = function() return PlayState() end,
-        -- ['victory'] = function() return VictoryState() end,
+        ['victory'] = function() return VictoryState() end,
         ['game-over'] = function() return GameOverState() end
     }
     gStateMachine:change('start')

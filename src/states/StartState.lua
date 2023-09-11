@@ -18,6 +18,7 @@ function StartState:update(dt)
 
         if highlighted == 1 then
             gStateMachine:change('serve', {
+                level = 1,
                 paddle = Paddle(1),
                 bricks = LevelMaker.CreateMap(1),
                 health = 3,

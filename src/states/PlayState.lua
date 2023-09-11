@@ -56,12 +56,24 @@ function PlayState:update(dt)
         -- only check collision if we're in play
         if brick.inPlay and self.ball:isCollide(brick) then
             -- add score
-            self.score = self.score + 10
+            self.score = self.score + (brick.tier * 200 + brick.color * 25)
 
             -- trigger the brick's hit function, which removes it from play
             brick:hit()
 
-            --
+            -- go to our victory screen if there are no more bricks left
+            if self:checkVictory() then
+                gSounds['victory']:play()
+
+                gStateMachine:change('victory', {
+                    level = self.level,
+                    paddle = self.paddle,
+                    health = self.health,
+                    score = self.score,
+                    ball = self.ball
+                })
+            end
+
             -- collision code for bricks
             --
             -- we check to see if the opposite side of our velocity is outside of the brick;
@@ -122,6 +134,10 @@ function PlayState:update(dt)
         end
     end
 
+    for k, brick in pairs(self.bricks) do
+        brick:update(dt)
+    end
+
     if love.keyboard.wasPressed('escape') then
         love.event.quit()
     end
@@ -134,6 +150,9 @@ function PlayState:render()
     for k, brick in pairs(self.bricks) do
         brick:render()
     end
+    for k, brick in pairs(self.bricks) do
+        brick:renderParticles()
+    end
 
     RenderHealth(self.health)
     RenderScore(self.score)
@@ -143,4 +162,14 @@ function PlayState:render()
         love.graphics.setFont(gFonts['large'])
         love.graphics.printf("PAUSED", 0, VIRTUAL_HEIGHT / 2 - 16, VIRTUAL_WIDTH, 'center')
     end
+end
+
+function PlayState:checkVictory()
+    for k, brick in pairs(self.bricks) do
+        if brick.inPlay then
+            return false
+        end
+    end
+
+    return true
 end
