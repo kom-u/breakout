@@ -1,17 +1,3 @@
---[[
-    GD50
-    Breakout Remake
-
-    -- StartState Class --
-
-    Author: Colton Ogden
-    cogden@cs50.harvard.edu
-
-    Represents the state the game is in when we've just started; should
-    simply display "Breakout" in large text, as well as a message to press
-    Enter to begin.
-]]
-
 -- the "__includes" bit here means we're going to inherit all of the methods
 -- that BaseState has, so it will have empty versions of all StateMachine methods
 -- even if we don't override them ourselves; handy to avoid superfluous code!
@@ -25,6 +11,14 @@ function StartState:update(dt)
     if love.keyboard.wasPressed('up') or love.keyboard.wasPressed('down') then
         highlighted = highlighted == 1 and 2 or 1
         gSounds['paddle-hit']:play()
+    end
+
+    if love.keyboard.wasPressed('enter') or love.keyboard.wasPressed('return') then
+        gSounds['confirm']:play()
+
+        if highlighted == 1 then
+            gStateMachine:change('play')
+        end
     end
 
     -- we no longer have this globally, so include here
